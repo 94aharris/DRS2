@@ -34,18 +34,18 @@ function Get-DrsScriptPerformance {
     process {
         
         # Set the Miliseconds
-        $TotalMiliseconds = 0
+        $totalMiliseconds = 0
 
         # Loop the Range
         foreach ($i in 1..$Iterations) {
-            $TotalMiliseconds = $TotalMiliseconds + (Measure-Command $Command).Milliseconds
+            $totalMiliseconds = $totalMiliseconds + (Measure-Command $Command).Milliseconds
         }
 
         # Return
         [PSCustomObject]@{
-            Miliseconds = $TotalMiliseconds
-            Iterations = $Iterations
-            Command = $Command
+            Miliseconds = $totalMiliseconds
+            Iterations = $iterations
+            Command = $command
         }
         return
     }
