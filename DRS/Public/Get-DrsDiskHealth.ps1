@@ -1,20 +1,21 @@
 #Requires -Version 5.1
-<#
-.SYNOPSIS
-    Get Disk Dirty Bit
-.DESCRIPTION
-    Returns the current disk health status (dirty bit)
-.EXAMPLE
-    PS C:\> Get-DrsDisk
-    Returns local volumes health
-.INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
-.NOTES
-    General notes
-#>
 function Get-DrsDiskHealth {
+    <#
+        .SYNOPSIS
+            Get Disk Dirty Bit
+        .DESCRIPTION
+            Returns the current disk health status (dirty bit)
+        .EXAMPLE
+            PS C:\> Get-DrsDisk
+            Returns local volumes health
+        .INPUTS
+            Inputs (if any)
+        .OUTPUTS
+            Output (if any)
+        .NOTES
+            General notes
+    #>
+
     [CmdletBinding(DefaultParameterSetName='NoParams')]
     param (
         
@@ -22,6 +23,7 @@ function Get-DrsDiskHealth {
         [Parameter(Mandatory=$true,ParameterSetName='ComputerSpecified',ValueFromPipeline=$True)]
         [Alias("Computer")]
         [String[]]$ComputerName
+
     )
     
     begin {
@@ -64,6 +66,7 @@ function Get-DrsDiskHealth {
 
             # Format The Space Using the Private Format Function
             $VolumeSpace = Get-VolumeSpaceFormat -Volume $Volume
+            $VolumeStatus = Get-VolumeHealthStatus -Volume $Volume
         
             # Return Each Volume as an Object
             [PSCustomObject]@{
@@ -79,8 +82,7 @@ function Get-DrsDiskHealth {
                 FreeSpaceGB = $VolumeSpace.FreeSpaceGB
                 CapacityGB = $VolumeSpace.CapacityGB
                 FreeSpacePct = $VolumeSpace.FreeSpacePct
-
-
+                Status = $VolumeStatus
             }
         }
         return

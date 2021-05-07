@@ -1,0 +1,39 @@
+{
+    "volumeHealth": {
+        "rules": [{
+                "name": "freeSpacePctAlert",
+                "property": "freeSpacePct",
+                "comparator": "-lt",
+                "value": 99,
+                "message": "Free Space % is Less Than 99%",
+                "severity": "Critical"
+            }, {
+                "name": "diskDirtyAlert",
+                "property": "dirtyBit",
+                "comparator": "-eq",
+                "value": true,
+                "message": "Disk is Dirty and May Require CheckDisk",
+                "severity": "Alert"
+            }, {
+                "name": "freeSpaceWarning",
+                "property": "freeSpacePct",
+                "comparator": "-lt",
+                "value": 15,
+                "message": "Free Space % is Less Than 20%",
+                "severity": "Warning"
+        }]  
+    },
+
+    "environment": {
+        "computerOU": [],
+        "computer": [],
+        "userOU": [],
+        "sqlServers": [],
+        "clusters": [],
+        "email": {
+            "Sender": "",
+            "Recipient": [],
+            "SmtpServer": ""
+        }
+    }
+}

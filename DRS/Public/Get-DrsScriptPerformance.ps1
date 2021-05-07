@@ -1,19 +1,21 @@
-<#
-.SYNOPSIS
-    Get the performance of a passed script block
-.DESCRIPTION
-    Long description
-.EXAMPLE
-    PS C:\> <example usage>
-    Explanation of what the example does
-.INPUTS
-    Inputs (if any)
-.OUTPUTS
-    Output (if any)
-.NOTES
-    General notes
-#>
 function Get-DrsScriptPerformance {
+
+    <#
+        .SYNOPSIS
+            Get the performance of a passed script block
+        .DESCRIPTION
+            Long description
+        .EXAMPLE
+            PS C:\> <example usage>
+            Explanation of what the example does
+        .INPUTS
+            Inputs (if any)
+        .OUTPUTS
+            Output (if any)
+        .NOTES
+            General notes
+    #>
+
     [CmdletBinding(DefaultParameterSetName="ScriptBlock")]
     param (
         # Script block to test the performance of
