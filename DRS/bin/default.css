@@ -1,0 +1,85 @@
+table, th, td {
+  border: 1px solid black;
+}
+th {
+  cursor: pointer;
+}
+
+h1, h5, th {
+text-align: center;
+}
+
+table {
+font-family: Segoe UI; 
+box-shadow: 10px 10px 5px #888;
+border: thin ridge grey; 
+}
+
+th {
+background: #0046c3;
+color: #fff;
+max-width: 400px;
+padding: 5px 10px; 
+}
+
+td {
+font-size: 11px;
+padding: 5px 20px;
+color: #000; 
+max-width: 40vw;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+td:hover {
+white-space: normal;
+}
+
+tr {
+background: #b8d1f3; 
+}
+
+tr:hover {
+font-weight: bold;
+}
+
+tr:nth-child(even) {
+background: #dae5f4; 
+}
+
+tr:nth-child(odd) {
+background: #b8d1f3; 
+}
+
+.topnav {
+overflow: hidden;
+background-color: #333;
+}
+
+.topnav a {
+float: left;
+color: #f2f2f2;
+text-align: center;
+padding: 14px 16px;
+text-decoration: none;
+font-size: 17px;
+}
+
+.topnav a:hover {
+background-color: #ddd;
+color: black;
+}
+
+.topnav a.active {
+background-color: #4CAF50;
+color: white;
+}
+
+#critical {
+background-color: red;
+}
+
+#warning {
+background-color: orange;
+}

@@ -57,7 +57,7 @@ function Get-RuleResult {
         $RuleOutcome = compare-values @compareVariables
 
         Write-Verbose "Outcome: $RuleOutcome"
-        if ($Outcome) {
+        if ($RuleOutcome) {
             [PSCustomObject]@{
                 Severity = $Rule.severity
                 Message = $Rule.Message

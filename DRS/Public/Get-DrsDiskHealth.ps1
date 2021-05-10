@@ -57,33 +57,54 @@ function Get-DrsDiskHealth {
         foreach ($volume in $volumes) {
             
             # Check For Dirty Bit
-            if ($Volume.DirtyBitSet) {
-                $VolumeDirtyBit = $true
+            if ($volume.DirtyBitSet) {
+                $volumeDirtyBit = $true
             }
             else {
-                $VolumeDirtyBit = $false
+                $volumeDirtyBit = $false
             }
 
             # Format The Space Using the Private Format Function
-            $VolumeSpace = Get-VolumeSpaceFormat -Volume $Volume
-            $VolumeStatus = Get-VolumeHealthStatus -Volume $Volume
+            $volumeSpace = Get-VolumeSpaceFormat -Volume $volume
+            
         
-            # Return Each Volume as an Object
-            [PSCustomObject]@{
+            # Construct the statless Vol
+            $statelessVol = [PSCustomObject]@{
                 # TypeName     = 'DRS.Disk' # Possibly to Implement Later
-                ComputerName = $Volume.SystemName
-                Label        = $Volume.Label
-                Drive        = $Volume.DriveLetter
-                DirtyBit     = $VolumeDirtyBit
-                DeviceId     = $Volume.DeviceId
-                Capacity = $Volume.Capacity
-                FreeSpace = $Volume.FreeSpace
+                ComputerName = $volume.SystemName
+                Label        = $volume.Label
+                Drive        = $volume.DriveLetter
+                DirtyBit     = $volumeDirtyBit
+                DeviceId     = $volume.DeviceId
+                Capacity = $volume.Capacity
+                FreeSpace = $volume.FreeSpace
                 # Calculated from the Private Format Function
-                FreeSpaceGB = $VolumeSpace.FreeSpaceGB
-                CapacityGB = $VolumeSpace.CapacityGB
-                FreeSpacePct = $VolumeSpace.FreeSpacePct
-                Status = $VolumeStatus
+                FreeSpaceGB = $volumeSpace.FreeSpaceGB
+                CapacityGB = $volumeSpace.CapacityGB
+                FreeSpacePct = $volumeSpace.FreeSpacePct
+                Status = $volumeStatus
             }
+
+            # Determine Vol Status
+            $volumeStatus = Get-VolumeHealthStatus -Volume $statelessVol
+
+            # Final Construction and Return
+            [PSCustomObject]@{
+                ComputerName = $volume.SystemName
+                Label        = $volume.Label
+                Drive        = $volume.DriveLetter
+                DirtyBit     = $volumeDirtyBit
+                DeviceId     = $volume.DeviceId
+                Capacity = $volume.Capacity
+                FreeSpace = $volume.FreeSpace
+                # Calculated from the Private Format Function
+                FreeSpaceGB = $volumeSpace.FreeSpaceGB
+                CapacityGB = $volumeSpace.CapacityGB
+                FreeSpacePct = $volumeSpace.FreeSpacePct
+                Status = $volumeStatus.Severity
+                RuleResults = $volumeStatus.RuleResults
+            }
+
         }
         return
         

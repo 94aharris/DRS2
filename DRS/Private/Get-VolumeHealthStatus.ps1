@@ -42,8 +42,29 @@ function Get-VolumeHealthStatus {
             Write-Verbose "Processing VolumeHealth Rules"
             $Vol = $_
 
-            $config.VolumeHealth.alert | foreach {        
+            Write-Verbose "Getting Rule Results"
+            $ruleResults = $config.VolumeHealth.rules | ForEach-Object {        
                 Get-RuleResult -TestObject $vol -Rule $_
+            }
+
+            Write-Verbose "Determining Highest Severity Alert"
+            $highestSeverity = "Info"
+            if ($ruleResults.Severity -contains "Critical")
+            {
+                $highestSeverity = "Critical"
+
+            } elseif ($ruleResults.Severity -contains "Alert")
+            {
+                $highestSeverity = "Alert"
+            }  elseif ($ruleResults.Severity -contains "Warning")
+            {
+                $highestSeverity = "Warning"
+            }
+
+            Write-Verbose "Returning Severity and Alerts"
+            [PSCustomObject]@{
+                Severity = $highestSeverity
+                RuleResults = $ruleResults
             }
         }
  

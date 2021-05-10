@@ -35,5 +35,10 @@
             "Recipient": [],
             "SmtpServer": ""
         }
+    },
+
+    "report": {
+        "css": "bin/default.css",
+        "js": "bin/checkstatus.js"
     }
 }
