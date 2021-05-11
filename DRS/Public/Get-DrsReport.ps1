@@ -18,8 +18,16 @@ function Get-DrsReport {
 
     [CmdletBinding(DefaultParameterSetName="Config")]
     param (
-        [Parameter(ParameterSetName="Config")]
-        $Config = $null
+        [Parameter(ParameterSetName="ConfigReport")]
+        $Config,
+
+        [Parameter(ParameterSetName="ComputerReport",Mandatory,ValueFromPipeline)]
+        [Alias("Computer")]
+        [String[]]$ComputerName,
+
+        # Parameter for Creds
+        [Parameter(ParameterSetName='ComputerReport')]
+        [PSCredential]$Credential
 
     )
     
@@ -29,25 +37,20 @@ function Get-DrsReport {
     
     process {
         
+        # This will be needed eventually, fail early
         if ($null -eq $Config) {
             Write-Verbose "Config not passed, acquiring"
             $Config = Get-DrsConfig
         }
 
-        Write-Verbose "Determining Params based on Param Set"
-        switch ($PsCmdlet.ParameterSetName) {
-            "Config" {
-                $ReportParams = @{
-                    Config = $Config
-                }
-              }
-            Default {
-                throw "Bad Param Set $($PsCmdlet.ParameterSetName)"
-            }
-        }
+        # Acquire Computers Detect Failed Heartbeats
+        # $computerHeartbeat = Get-DrsComputer $Config
+        # $aliveComputer = $computerHeartbeat | where {$_.Heartbeat -eq $true}
+        # $unresponsiveComputer = $computerHeartbeat | where {$_.Heartbeat -eq $false}
 
+        # Pass all Params Right on through for now
         Write-Verbose "Generating Disk Report"
-        Get-DrsDiskReport @ReportParams
+        Get-DrsDiskReport @PsBoundParameters
     }
     
     end {

@@ -27,6 +27,7 @@
     "environment": {
         "computerOU": [],
         "computer": [],
+        "DirectoryServer": "",
         "userOU": [],
         "sqlServers": [],
         "clusters": [],
