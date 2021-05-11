@@ -39,6 +39,7 @@
 
     "report": {
         "css": "bin/default.css",
-        "js": "bin/checkstatus.js"
+        "js": "bin/checkstatus.js",
+        "output": "output"
     }
 }

@@ -21,7 +21,10 @@ function Get-DrsDiskReport {
         $CssPath = $null,
 
         [Parameter(ParameterSetName="HtmlReport")]
-        $JsPath = $null
+        $JsPath = $null,
+
+        [Parameter(ParameterSetName="HtmlReport")]
+        $OutputPath = $null
     )
     
     begin {
@@ -46,6 +49,17 @@ function Get-DrsDiskReport {
             $JsPath = Convert-path "$PSSCriptRoot\..\$($config.report.js)" -ErrorAction Stop
             Write-Verbose "CssPath: $JsPath"
         }
+
+        if ($null -eq $OutputPath) {
+            Write-verbose "Generating Output Path"
+            $OutputFolder = ".\$($config.report.output)\$(Get-Date -Format "y-MM-d-HHmm")"
+            try {
+                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
+            } catch {
+                New-item -path $OutputFolder -type "Directory"
+                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
+            }
+        }
         
         Write-Verbose "Acquiring Disk Health"
         $DiskHealth = Get-DrsDiskHealth
@@ -69,13 +83,13 @@ function Get-DrsDiskReport {
 
         Write-Verbose "Outputting HTML"
         Write-Verbose "$DiskHtml"
-        $DiskHtml | Out-file "DiskHealth.html" -Force -encoding utf8
+        $DiskHtml | Out-file "$OutputPath\DiskHealth.html" -Force -encoding utf8
 
         Write-Verbose "Outputting CSS from $CssPath"
-        Copy-Item -Path $cssPath -Destination "reportstyle.css" 
+        Copy-Item -Path $cssPath -Destination "$OutputPath\reportstyle.css" 
 
         Write-verbose "Outputting JSScripts from $JsPath"
-        Copy-Item -Path $JsPath -Destination "reportscript.js"
+        Copy-Item -Path $JsPath -Destination "$OutputPath\reportscript.js"
     }
     
     end {
