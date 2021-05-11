@@ -22,37 +22,74 @@ function Get-DrsDiskHealth {
         # Parameter for the computers to query against
         [Parameter(Mandatory=$true,ParameterSetName='ComputerSpecified',ValueFromPipeline=$True)]
         [Alias("Computer")]
-        [String[]]$ComputerName
+        [String[]]$ComputerName,
 
+        # Parameter for Creds
+        [Parameter(ParameterSetName='ComputerSpecified')]
+        [PSCredential]$Credential
     )
     
     begin {
+
         
     }
     
     process {
         
+        # Common CIM Query Params
+        # Filter Out Optical Drives (Drive Type 5)
+        # Not using Get-Volume here because performance with Get-CimInstance is about 6x faster
+        $cimParams = @{
+            ClassName = 'Win32_volume'
+            Filter = 'DriveType != 5' 
+        }
+        
         # Splat the cim params based on parameter set name used
-        if ($PSCmdlet.ParameterSetName -eq 'ComputerSpecified') {
+        switch ($PSCmdlet.ParameterSetName) {
             
-            # If computer is specified, passed computer and classname for win32_volume
-            $cimParams = @{
-                ClassName = 'Win32_volume'
-                ComputerName = $ComputerName
+            # Processing for Multiple Computers
+            'ComputerSpecified' {
+                
+                $volumes = foreach ($computer in $computerName) {
+                    
+                    Write-Verbose "Processing $Computer"
+                    # Attempt to process a CimSession to the remote computer
+                    try {
+                        if ($Credential) {
+                            Write-Verbose "Connecting to $Computer with Credentials"
+                            $cimSession = New-CimSession -ComputerName $Computer -Credential $Credential
+                        } else {    
+                            Write-Verbose "Connecting to $Computer as Current User"
+                            $cimSession = New-CimSession -ComputerName $Computer 
+                        }
+                        
+                        # If computer is specified, passed computer and classname for win32_volume
+                        Write-Verbose "Getting Volume Info From $Computer"
+                        Get-CimInstance @cimParams -CimSession $cimSession
+
+                    } catch {
+                        throw "Error Processing $Computer : $($_.Exception.Message)"
+                    } Finally {
+                        if ($cimSession) {
+                            Write-Verbose "Cleaning Up CIM Session to $Computer"
+                            Remove-CimSession -CimSession $cimSession
+                        }
+                    }
+
+                }
+
+              }
+            
+            # Processing for No Params (Local Computer)
+            Default {
+                # Get Volumes using splatted params
+                Write-Verbose "Getting Volume Info From Local Host"
+                $volumes = Get-CimInstance @cimParams    
             }
-        
-        } else {
-        
-            # if no params are passed, only pass the classname to cim
-            $cimParams = @{
-                ClassName = 'Win32_Volume'
-            }
-        
         }
 
-        # Get Volumes using splatted params
-        # Not using Get-Volume here because performance with Get-CimInstance is about 6x faster
-        $volumes = Get-CimInstance @cimParams    
+
+
         
         foreach ($volume in $volumes) {
             

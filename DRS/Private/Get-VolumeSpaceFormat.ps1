@@ -29,14 +29,27 @@ function Get-VolumeSpaceFormat {
     process {
         $Volume | foreach {
             
-            # Calculate Capacity (TODO Add GB / TB / MB Rounding)
-            $VolumeCapacityGB = [math]::round(($volume.Capacity/ 1GB),2) -as [int]
-
+            # Handle for Divide by Zero
+            if ($Volume.Capacity -eq 0) {
+                $VolumeCapacityGB = 0
+            } else {
+                # Calculate Capacity (TODO Add GB / TB / MB Rounding)
+                $volumeCapacityGB = [math]::round(($volume.Capacity/ 1GB),2) -as [int]
+            }
+            
             # Run the Same Calculations for Free
-            $VolumeFreeGB = [math]::round(($volume.FreeSpace/ 1GB),2) -as [int]
+            if ($Volume.FreeSpace -eq 0) {
+                $VolumeFreeGB = 0
+            } else {
+                $VolumeFreeGB = [math]::round(($volume.FreeSpace/ 1GB),2) -as [int]
+            }
 
-            # Get an Easy Percent
-            $VolumeFreePct = [math]::round((($volume.FreeSpace/$volume.Capacity) * 100),0) -as [int];
+            # Get an Easy Percent Handle for divide by zero 
+            if (($Volume.FreeSpace -eq 0) -or ($Volume.Capacity -eq 0)) {
+                $VolumeFreePct = 0
+            } else {
+                $VolumeFreePct = [math]::round((($volume.FreeSpace/$volume.Capacity) * 100),0) -as [int];
+            }
             
             
             [PSCustomObject]@{

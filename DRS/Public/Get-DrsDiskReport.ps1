@@ -15,16 +15,18 @@ function Get-DrsDiskReport {
         General notes
     #>
     
-    [CmdletBinding(DefaultParameterSetName="HtmlReport")]
+    [CmdletBinding(DefaultParameterSetName="ConfigReport")]
     param (
-        [Parameter(ParameterSetName="HtmlReport")]
-        $CssPath = $null,
+        [Parameter(ParameterSetName="ConfigReport")]
+        $Config,
 
-        [Parameter(ParameterSetName="HtmlReport")]
-        $JsPath = $null,
+        [Parameter(ParameterSetName="ComputerReport",Mandatory,ValueFromPipeline)]
+        [Alias("Computer")]
+        [String[]]$ComputerName,
 
-        [Parameter(ParameterSetName="HtmlReport")]
-        $OutputPath = $null
+        # Parameter for Creds
+        [Parameter(ParameterSetName='ComputerReport')]
+        [PSCredential]$Credential
     )
     
     begin {
@@ -32,37 +34,42 @@ function Get-DrsDiskReport {
     }
     
     process {
-        if ($null -eq $config) {
-            Write-Verbose "Config not passed, acquiring"
-            $config = Get-DrsConfig
-        }
-
         
-        if ($null -eq $CssPath) {
-            Write-verbose "Generating CSS Path"
-            $CssPath = Convert-path "$PSSCriptRoot\..\$($config.report.css)" -ErrorAction Stop
-            Write-Verbose "CssPath: $cssPath"
+        # Default Params for Get-DRSDiskHealth
+        $DiskHealthParams = @{
+
         }
 
-        if ($null -eq $JsPath) {
-            Write-verbose "Generating CSS Path"
-            $JsPath = Convert-path "$PSSCriptRoot\..\$($config.report.js)" -ErrorAction Stop
-            Write-Verbose "CssPath: $JsPath"
-        }
-
-        if ($null -eq $OutputPath) {
-            Write-verbose "Generating Output Path"
-            $OutputFolder = ".\$($config.report.output)\$(Get-Date -Format "y-MM-d-HHmm")"
-            try {
-                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
-            } catch {
-                New-item -path $OutputFolder -type "Directory"
-                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
+        # Evaluate ParameterSet Used
+        switch ($PSCmdlet.ParameterSetName) {
+            # If no Params or Using Config
+            "ConfigReport" {
+                if ($null -eq $config) {
+                    Write-Verbose "Config not passed, acquiring"
+                    $config = Get-DrsConfig
+                }
             }
+
+            # If Receiving Specific Computers Add them to param
+            "ComputerReport" {
+                $DiskHealthParams.Add("ComputerName",$ComputerName)
+                
+                # Add the Credential to Key Value Pair if Passed
+                if ($Credential) {
+                    $DiskHealthParams.add("Credential",$Credential)
+                } 
+            }
+
+            default {
+                throw "Bad Param Set Evaluation"
+            }
+
         }
+
+
         
         Write-Verbose "Acquiring Disk Health"
-        $DiskHealth = Get-DrsDiskHealth
+        $DiskHealth = Get-DrsDiskHealth @DiskHealthParams
         
         Write-Verbose "Generating HTML"
         $DiskHtmlParams = @{
@@ -82,14 +89,7 @@ function Get-DrsDiskReport {
         $DiskHtml = ConvertTo-DrsHtml @DiskHtmlParams
 
         Write-Verbose "Outputting HTML"
-        Write-Verbose "$DiskHtml"
-        $DiskHtml | Out-file "$OutputPath\DiskHealth.html" -Force -encoding utf8
-
-        Write-Verbose "Outputting CSS from $CssPath"
-        Copy-Item -Path $cssPath -Destination "$OutputPath\reportstyle.css" 
-
-        Write-verbose "Outputting JSScripts from $JsPath"
-        Copy-Item -Path $JsPath -Destination "$OutputPath\reportscript.js"
+        Out-DrsHtml -Html $DiskHtml -ReportName "DiskReport"
     }
     
     end {

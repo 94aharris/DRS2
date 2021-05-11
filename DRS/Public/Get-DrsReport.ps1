@@ -16,9 +16,11 @@ function Get-DrsReport {
             General notes
     #>
 
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="Config")]
     param (
-        
+        [Parameter(ParameterSetName="Config")]
+        $Config = $null
+
     )
     
     begin {
@@ -26,10 +28,26 @@ function Get-DrsReport {
     }
     
     process {
-        Write-Output "Acquiring Disks"
-        $Disks = Get-DrsDiskHealth
-        Format-DiskSpace $Disks
+        
+        if ($null -eq $Config) {
+            Write-Verbose "Config not passed, acquiring"
+            $Config = Get-DrsConfig
+        }
 
+        Write-Verbose "Determining Params based on Param Set"
+        switch ($PsCmdlet.ParameterSetName) {
+            "Config" {
+                $ReportParams = @{
+                    Config = $Config
+                }
+              }
+            Default {
+                throw "Bad Param Set $($PsCmdlet.ParameterSetName)"
+            }
+        }
+
+        Write-Verbose "Generating Disk Report"
+        Get-DrsDiskReport @ReportParams
     }
     
     end {
