@@ -20,7 +20,7 @@ function Get-DrsDiskHealth {
     param (
         
         # Parameter for the computers to query against
-        [Parameter(Mandatory=$true,ParameterSetName='ComputerSpecified',ValueFromPipeline=$True)]
+        [Parameter(Mandatory,ParameterSetName='ComputerSpecified',ValueFromPipeline)]
         [Alias("Computer")]
         [String[]]$ComputerName,
 
@@ -44,53 +44,21 @@ function Get-DrsDiskHealth {
             Filter = 'DriveType != 5' 
         }
         
-        # Splat the cim params based on parameter set name used
-        switch ($PSCmdlet.ParameterSetName) {
-            
-            # Processing for Multiple Computers
-            'ComputerSpecified' {
-                
-                $volumes = foreach ($computer in $computerName) {
-                    
-                    Write-Verbose "Processing $Computer"
-                    # Attempt to process a CimSession to the remote computer
-                    try {
-                        if ($Credential) {
-                            Write-Verbose "Connecting to $Computer with Credentials"
-                            $cimSession = New-CimSession -ComputerName $Computer -Credential $Credential
-                        } else {    
-                            Write-Verbose "Connecting to $Computer as Current User"
-                            $cimSession = New-CimSession -ComputerName $Computer 
-                        }
-                        
-                        # If computer is specified, passed computer and classname for win32_volume
-                        Write-Verbose "Getting Volume Info From $Computer"
-                        Get-CimInstance @cimParams -CimSession $cimSession
-
-                    } catch {
-                        throw "Error Processing $Computer : $($_.Exception.Message)"
-                    } Finally {
-                        if ($cimSession) {
-                            Write-Verbose "Cleaning Up CIM Session to $Computer"
-                            Remove-CimSession -CimSession $cimSession
-                        }
-                    }
-
-                }
-
-              }
-            
-            # Processing for No Params (Local Computer)
-            Default {
-                # Get Volumes using splatted params
-                Write-Verbose "Getting Volume Info From Local Host"
-                $volumes = Get-CimInstance @cimParams    
+        # Based on passed Params, query other computer or local
+        if ($ComputerName) {
+            if ($Credential) {
+                Write-Verbose "Getting Volumes from Remote Computer, Credentials Specified"
+                $volumes = Get-DrsCimInstance -CimParams $cimParams -ComputerName $ComputerName -Credential $Credential
+            } else {
+                Write-Verbose "Getting Volumes from Remote Computer, Current User"
+                $volumes = Get-DrsCimInstance -CimParams $cimParams -ComputerName $ComputerName 
             }
+            
+        } else {
+            Write-Verbose "Getting Volumes from Local Computer"
+            $volumes = Get-DrsCimInstance -CimParams $cimParams    
         }
-
-
-
-        
+               
         foreach ($volume in $volumes) {
             
             # Check For Dirty Bit

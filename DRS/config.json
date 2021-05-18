@@ -4,7 +4,7 @@
                 "name": "freeSpacePctAlert",
                 "property": "freeSpacePct",
                 "comparator": "-lt",
-                "value": 99,
+                "value": 90,
                 "message": "Free Space % is Less Than 99%",
                 "severity": "Critical"
             }, {
@@ -22,6 +22,19 @@
                 "message": "Free Space % is Less Than 20%",
                 "severity": "Warning"
         }]  
+    },
+    
+    "serviceHealth": {
+        "ignoreStartName": ["LocalSystem","NT AUTHORITY\\NetworkService","NT AUTHORITY\\LocalService"],
+        "ignoreServiceName": [],
+        "rules": [{
+            "name": "autoServiceStoppedAlert",
+            "property": "state",
+            "comparator": "-ne",
+            "value": "Running",
+            "message": "An Automatic Service is Stopped",
+            "severity": "Critical"
+        }]
     },
 
     "environment": {

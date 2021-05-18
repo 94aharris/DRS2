@@ -24,6 +24,9 @@ function Compare-Values {
         # Check for 'equals' equivalent operators
         {"-eq","==" -contains $_} {  return $property -eq $value }
 
+        # Check for 'not equals' equivalent operators
+        {"-ne", "!=" -contains $_} { return $property -ne $value }
+
         # Error out if unrecognized
         Default {throw "Comparator value $comparator is not a valid operator. Valid Operators include, -gt, >, -lt, <, -eq, =="}
     }

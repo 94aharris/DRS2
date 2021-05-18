@@ -1,4 +1,4 @@
-function Get-ServiceHealthStatus {
+function Get-VolumeHealthStatus {
     <#
     .SYNOPSIS
         Short description
@@ -15,13 +15,13 @@ function Get-ServiceHealthStatus {
         General notes
     #>
 
-    [CmdletBinding(DefaultParameterSetName="Service")]
+    [CmdletBinding(DefaultParameterSetName="Volume")]
     param (
-        # Service to Return Alerts for
-        [Parameter(Mandatory=$true,ParameterSetName='Service',ValuefromPipeline=$True)]
-        $Service,
+        # Volume to Return Alerts for
+        [Parameter(Mandatory=$true,ParameterSetName='Volume',ValuefromPipeline=$True)]
+        $Volume,
 
-        [Parameter(ParameterSetName='Service')]
+        [Parameter(ParameterSetName='Volume')]
         $config
     )
     
@@ -36,15 +36,15 @@ function Get-ServiceHealthStatus {
     }
     
     process {
-        $Service | foreach {
-            Write-Verbose "Processing Service $_"
+        $Volume | foreach {
+            Write-Verbose "Processing Volume $_"
             
-            Write-Verbose "Processing Service Rules"
-            $Ser = $_
+            Write-Verbose "Processing VolumeHealth Rules"
+            $Vol = $_
 
             Write-Verbose "Getting Rule Results"
-            $ruleResults = $config.ServiceHealth.rules | ForEach-Object {        
-                Get-RuleResult -TestObject $ser -Rule $_
+            $ruleResults = $config.VolumeHealth.rules | ForEach-Object {        
+                Get-RuleResult -TestObject $vol -Rule $_
             }
 
             Write-Verbose "Determining Highest Severity Alert"
