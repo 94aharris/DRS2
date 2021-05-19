@@ -51,6 +51,9 @@ function Get-DrsReport {
         # Pass all Params Right on through for now
         Write-Verbose "Generating Disk Report"
         Get-DrsDiskReport @PsBoundParameters
+
+        Write-Verbose "Generating Service Report"
+        Get-DrsServiceReport @PsBoundParameters
     }
     
     end {

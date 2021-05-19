@@ -1,7 +1,7 @@
-function Get-DrsDiskReport {
+function Get-DrsServiceReport {
     <#
     .SYNOPSIS
-        Get Disk Report for computers
+        Short description
     .DESCRIPTION
         Long description
     .EXAMPLE
@@ -14,7 +14,6 @@ function Get-DrsDiskReport {
     .NOTES
         General notes
     #>
-    
     [CmdletBinding(DefaultParameterSetName="ConfigReport")]
     param (
         [Parameter(ParameterSetName="ConfigReport")]
@@ -31,12 +30,8 @@ function Get-DrsDiskReport {
     
     begin {
 
-    }
-    
-    process {
-        
-        # Default Params for Get-DRSDiskHealth
-        $DiskHealthParams = @{
+        # Default Params for Get-DRSServiceHealth
+        $ServiceHealthParams = @{
 
         }
 
@@ -52,11 +47,11 @@ function Get-DrsDiskReport {
 
             # If Receiving Specific Computers Add them to param
             "ComputerReport" {
-                $DiskHealthParams.Add("ComputerName",$ComputerName)
+                $ServiceHealthParams.Add("ComputerName",$ComputerName)
                 
                 # Add the Credential to Key Value Pair if Passed
                 if ($Credential) {
-                    $DiskHealthParams.add("Credential",$Credential)
+                    $ServiceHealthParams.add("Credential",$Credential)
                 } 
             }
 
@@ -66,31 +61,32 @@ function Get-DrsDiskReport {
 
         }
 
+        Write-Verbose "Acquiring Service Health"
+        $ServiceHealth = Get-DrsServiceHealth @ServiceHealthParams
 
-        
-        Write-Verbose "Acquiring Disk Health"
-        $DiskHealth = Get-DrsDiskHealth @DiskHealthParams
-        
         Write-Verbose "Generating HTML"
-        $DiskHtmlParams = @{
-            HealthObject = $DiskHealth
-            Title = "DRS - Disk Report"
+        $ServiceHtmlParams = @{
+            HealthObject = $ServiceHealth
+            Title = "DRS - Service Report"
             DisplayProperties = @(
-                'ComputerName',
-                'Label',
-                'Drive',
-                'DirtyBit',
-                'FreeSpaceGB',
-                'CapacityGB',
-                'FreeSpacePct',
+                'ComputerName'
+                'Name'
+                'State'
+                'StartName'
                 'Status'
             )
         }
 
-        $DiskHtml = ConvertTo-DrsHtml @DiskHtmlParams
+        $ServiceHtml = ConvertTo-DrsHtml @ServiceHtmlParams
 
         Write-Verbose "Outputting HTML"
-        Out-DrsHtml -Html $DiskHtml -ReportName "DiskReport"
+        Out-DrsHtml -Html $ServiceHtml -ReportName "ServiceReport"
+
+        
+    }
+    
+    process {
+        
     }
     
     end {

@@ -2,10 +2,10 @@ function ConvertTo-DrsHtml {
     [CmdletBinding(DefaultParameterSetName='ObjectHtml')]
     param (
         # Object to ConvertTo Html 
-        [Parameter(Mandatory=$true,ParameterSetName='ObjectHtml',ValuefromPipeline=$True)]
+        [Parameter(ParameterSetName='ObjectHtml',Mandatory,ValuefromPipeline)]
         $HealthObject,
 
-        [Parameter(Mandatory=$true, ParameterSetName='ObjectHtml')]
+        [Parameter(ParameterSetName='ObjectHtml',Mandatory)]
         [String[]]$DisplayProperties,
 
         [Parameter(ParameterSetName='ObjectHtml')]
@@ -14,8 +14,11 @@ function ConvertTo-DrsHtml {
         [Parameter(ParameterSetName='ObjectHtml')]
         $config,
 
-        [Parameter(ParameterSetName='scripts')]
-        $scripts = '<script type="text/javascript" src="reportscript.js"></script>'
+        [Parameter(ParameterSetName='ObjectHtml')]
+        $scripts = '<script type="text/javascript" src="reportscript.js"></script>',
+
+        [Parameter(ParameterSetName='ObjectHtml')]
+        $title = 'DRS Report'
     )
     
     begin {
@@ -36,7 +39,7 @@ function ConvertTo-DrsHtml {
             return $HtmlBodyFragment
         }
         else {
-            $HtmlFull = ConvertTo-Html -CssUri "reportstyle.css" -body $HtmlBodyFragment
+            $HtmlFull = ConvertTo-Html -CssUri "reportstyle.css" -body $HtmlBodyFragment -Title $title
             $HtmlFull
         }
 

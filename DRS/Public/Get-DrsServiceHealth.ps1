@@ -81,7 +81,7 @@ function Get-DrsServiceHealth {
 
                 # Final Construction and return
                 [PSCustomObject]@{
-                    ComputerName = $service.PSComputerName
+                    ComputerName = $service.SystemName
                     Name        = $service.Name
                     StartMode = $service.StartMode
                     State = $service.State
