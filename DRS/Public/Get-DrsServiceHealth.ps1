@@ -28,7 +28,8 @@ function Get-DrsServiceHealth {
         [Parameter(ParameterSetName='ComputerSpecified')]
         [PSCredential]$Credential,
 
-        [Parameter(ParameterSetName='Service')]
+        [Parameter(ParameterSetName='ComputerSpecified')]
+        [Parameter(ParameterSetName='NoParams')]
         $config
     )
     

@@ -32,7 +32,7 @@ function Out-DrsHtml {
         $JsPath = $null,
 
         [Parameter(ParameterSetName="HtmlReport")]
-        $OutputPath = $null
+        $OutputFolder = $null
     )
     
     begin {
@@ -58,15 +58,16 @@ function Out-DrsHtml {
             Write-Verbose "CssPath: $JsPath"
         }
 
-        if ($null -eq $OutputPath) {
+        if ($null -eq $OutputFolder) {
             Write-verbose "Generating Output Path"
             $OutputFolder = ".\$($config.report.output)\$(Get-Date -Format "y-MM-d-HHmm")"
-            try {
-                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
-            } catch {
-                New-item -path $OutputFolder -type "Directory" | Out-Null
-                $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
-            }
+        }
+
+        try {
+            $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
+        } catch {
+            New-item -path $OutputFolder -type "Directory" | Out-Null
+            $OutputPath = Convert-Path $OutputFolder -ErrorAction Stop
         }
 
         Write-Verbose "Sending HTML To File"

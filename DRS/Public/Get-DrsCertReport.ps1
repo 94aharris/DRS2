@@ -1,7 +1,7 @@
-function Get-DrsDiskReport {
+function Get-DrsCertReport {
     <#
     .SYNOPSIS
-        Get Disk Report for computers
+        Short description
     .DESCRIPTION
         Long description
     .EXAMPLE
@@ -14,7 +14,6 @@ function Get-DrsDiskReport {
     .NOTES
         General notes
     #>
-    
     [CmdletBinding(DefaultParameterSetName="ConfigReport")]
     param (
         [Parameter(ParameterSetName="ConfigReport")]
@@ -36,12 +35,8 @@ function Get-DrsDiskReport {
     
     begin {
 
-    }
-    
-    process {
-        
-        # Default Params for Get-DRSDiskHealth
-        $DiskHealthParams = @{
+        # Default Params for Get-DRScertHealth
+        $certHealthParams = @{
 
         }
 
@@ -57,11 +52,11 @@ function Get-DrsDiskReport {
 
             # If Receiving Specific Computers Add them to param
             "ComputerReport" {
-                $DiskHealthParams.Add("ComputerName",$ComputerName)
+                $certHealthParams.Add("ComputerName",$ComputerName)
                 
                 # Add the Credential to Key Value Pair if Passed
                 if ($Credential) {
-                    $DiskHealthParams.add("Credential",$Credential)
+                    $certHealthParams.add("Credential",$Credential)
                 } 
             }
 
@@ -71,38 +66,37 @@ function Get-DrsDiskReport {
 
         }
 
+        Write-Verbose "Acquiring Cert Health"
+        $CertHealth = Get-DrsCertHealth @CertHealthParams
 
-        
-        Write-Verbose "Acquiring Disk Health"
-        $DiskHealth = Get-DrsDiskHealth @DiskHealthParams
-        
         Write-Verbose "Generating HTML"
-        $DiskHtmlParams = @{
-            HealthObject = $DiskHealth
-            Title = "DRS - Disk Report"
+        $CertHtmlParams = @{
+            HealthObject = $CertHealth
+            Title = "DRS - Cert Report"
             DisplayProperties = @(
-                'ComputerName',
-                'Label',
-                'Drive',
-                'DirtyBit',
-                'FreeSpaceGB',
-                'CapacityGB',
-                'FreeSpacePct',
+                'FriendlyName'
+                'Subject'
+                'Expiration'
                 'Status'
             )
         }
 
-        $DiskHtml = ConvertTo-DrsHtml @DiskHtmlParams
-
+        $CertHtml = ConvertTo-DrsHtml @CertHtmlParams
 
         Write-Verbose "Outputting HTML"
         if ($OutputFolder)
         {
-            Out-DrsHtml -Html $DiskHtml -ReportName "DiskReport" -OutputFolder $OutputFolder
+            Out-DrsHtml -Html $CertHtml -ReportName "CertReport" -OutputFolder $OutputFolder
         } else {
-            Out-DrsHtml -Html $DiskHtml -ReportName "DiskReport" 
+            Out-DrsHtml -Html $CertHtml -ReportName "CertReport" 
         }
+        
 
+        
+    }
+    
+    process {
+        
     }
     
     end {

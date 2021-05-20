@@ -25,7 +25,12 @@ function Get-DrsServiceReport {
 
         # Parameter for Creds
         [Parameter(ParameterSetName='ComputerReport')]
-        [PSCredential]$Credential
+        [PSCredential]$Credential,
+
+        # Parameter for Output Folder
+        [Parameter(ParameterSetName='ComputerReport')]
+        [Parameter(ParameterSetName='ConfigReport')]
+        [String]$OutputFolder
     )
     
     begin {
@@ -80,7 +85,12 @@ function Get-DrsServiceReport {
         $ServiceHtml = ConvertTo-DrsHtml @ServiceHtmlParams
 
         Write-Verbose "Outputting HTML"
-        Out-DrsHtml -Html $ServiceHtml -ReportName "ServiceReport"
+        if ($OutputFolder)
+        {
+            Out-DrsHtml -Html $ServiceHtml -ReportName "ServiceReport" -OutputFolder $OutputFolder
+        } else {
+            Out-DrsHtml -Html $ServiceHtml -ReportName "ServiceReport" 
+        }
 
         
     }

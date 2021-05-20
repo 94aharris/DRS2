@@ -37,6 +37,13 @@
         }]
     },
 
+    "certHealth": {
+        "ignoreExpiredOlderThanDays": -1,
+        "warningExpirationDays": 30,
+        "alertExpirationDays": 10,
+        "criticalExpirationDays": 5
+    },
+
     "environment": {
         "computerOU": [],
         "computer": [],

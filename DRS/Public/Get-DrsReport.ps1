@@ -40,8 +40,10 @@ function Get-DrsReport {
         # This will be needed eventually, fail early
         if ($null -eq $Config) {
             Write-Verbose "Config not passed, acquiring"
-            $Config = Get-DrsConfig
+            $config = Get-DrsConfig
         }
+
+        $OutputFolder = ".\$($config.report.output)\$(Get-Date -Format "y-MM-d-HHmm")"
 
         # Acquire Computers Detect Failed Heartbeats
         # $computerHeartbeat = Get-DrsComputer $Config
@@ -50,10 +52,13 @@ function Get-DrsReport {
 
         # Pass all Params Right on through for now
         Write-Verbose "Generating Disk Report"
-        Get-DrsDiskReport @PsBoundParameters
+        Get-DrsDiskReport @PsBoundParameters -OutputFolder $OutputFolder
 
         Write-Verbose "Generating Service Report"
-        Get-DrsServiceReport @PsBoundParameters
+        Get-DrsServiceReport @PsBoundParameters -OutputFolder $OutputFolder
+
+        Write-Verbose "Generating Cert Report"
+        Get-DrsCertReport @PsBoundParameters -OutputFolder $OutputFolder
     }
     
     end {
