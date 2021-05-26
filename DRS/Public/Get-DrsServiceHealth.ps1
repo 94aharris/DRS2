@@ -16,20 +16,20 @@ function Get-DrsServiceHealth {
     .NOTES
         General notes
     #>
-    [CmdletBinding(DefaultParameterSetName='NoParams')]
+    [CmdletBinding(DefaultParameterSetName = 'NoParams')]
     param (
         
         # Parameter for the computers to query against
-        [Parameter(Mandatory,ParameterSetName='ComputerSpecified',ValueFromPipeline)]
+        [Parameter(Mandatory, ParameterSetName = 'ComputerSpecified', ValueFromPipeline)]
         [Alias("Computer")]
         [String[]]$ComputerName,
 
         # Parameter for Creds
-        [Parameter(ParameterSetName='ComputerSpecified')]
+        [Parameter(ParameterSetName = 'ComputerSpecified')]
         [PSCredential]$Credential,
 
-        [Parameter(ParameterSetName='ComputerSpecified')]
-        [Parameter(ParameterSetName='NoParams')]
+        [Parameter(ParameterSetName = 'ComputerSpecified')]
+        [Parameter(ParameterSetName = 'NoParams')]
         $config
     )
     
@@ -50,7 +50,7 @@ function Get-DrsServiceHealth {
         # Only Queries Automatic Services
         $cimParams = @{
             ClassName = 'Win32_Service'
-            Filter = 'StartMode = "Auto"'
+            Filter    = 'StartMode = "Auto"'
         }
 
         # Based on passed Params, query other computer or local
@@ -58,11 +58,13 @@ function Get-DrsServiceHealth {
             if ($Credential) {
                 Write-Verbose "Getting Services from Remote Computer, Credentials Specified"
                 $services = Get-DrsCimInstance -CimParams $cimParams -ComputerName $ComputerName -Credential $Credential
-            } else {
+            }
+            else {
                 Write-Verbose "Getting Services from Remote Computer, Current User"
                 $services = Get-DrsCimInstance -CimParams $cimParams -ComputerName $ComputerName
             }
-        } else {
+        }
+        else {
             Write-Verbose "Getting Services from Local Computer"
             $services = Get-DrsCimInstance -CimParams $cimParams 
         }
@@ -83,12 +85,12 @@ function Get-DrsServiceHealth {
                 # Final Construction and return
                 [PSCustomObject]@{
                     ComputerName = $service.SystemName
-                    Name        = $service.Name
-                    StartMode = $service.StartMode
-                    State = $service.State
-                    StartName = $service.StartName
-                    Status = $serviceStatus.Severity
-                    RuleResults = $serviceStatus.RuleResults
+                    Name         = $service.Name
+                    StartMode    = $service.StartMode
+                    State        = $service.State
+                    StartName    = $service.StartName
+                    Status       = $serviceStatus.Severity
+                    RuleResults  = $serviceStatus.RuleResults
                 }
             }
         }

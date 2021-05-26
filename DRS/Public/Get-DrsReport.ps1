@@ -59,6 +59,9 @@ function Get-DrsReport {
 
         Write-Verbose "Generating Cert Report"
         Get-DrsCertReport @PsBoundParameters -OutputFolder $OutputFolder
+
+        Write-Verbose "Generating Boot Report"
+        Get-DrsBootReport @PsBoundParameters -OutputFolder $OutputFolder
     }
     
     end {
