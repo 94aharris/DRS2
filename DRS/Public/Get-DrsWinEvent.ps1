@@ -1,4 +1,4 @@
-function Get-DrsEventLog {
+function Get-DrsWinEvent {
     <#
     .SYNOPSIS
         Short description
@@ -34,7 +34,9 @@ function Get-DrsEventLog {
 
         # 0 (LogAlways), 1 (Critical), 2 (Error), 3 (Warning), 4 (Info), 5 (Verbose)
         [ValidateRange(0, 5)]
-        [Int32] $Severity = 2
+        [Int32] $Severity = 2,
+
+        [switch] $Raw = $false
 
     )
     
@@ -46,12 +48,14 @@ function Get-DrsEventLog {
             startTime = $After
             endTime   = $Before
         }
+
+        
         
     }
     
     process {
         if ($null -ne $ComputerName) {
-            foreach ($name in $ComputerName) {
+            $rawEvents = foreach ($name in $ComputerName) {
                 try {
                     if ($null -ne $Credential) {
                         Write-Verbose "Getting $LogName Events from $name using Credentials"
@@ -65,7 +69,8 @@ function Get-DrsEventLog {
                 catch [Exception] {
                     if ($_.Exception -match "No events were found that match the specified selection criteria") {
                         Write-Verbose "No matching events found";
-                    } else {
+                    }
+                    else {
                         Write-Error "Error Reading Event Log on Local Computer : $($_.Exception.Message)"
                     }
                     
@@ -75,19 +80,45 @@ function Get-DrsEventLog {
         else {
             try {
                 Write-Verbose "Getting $LogName Events from Local Computer"
-                Get-WinEvent -FilterHashtable $eventFilter -ErrorAction Stop
+                $rawEvents = Get-WinEvent -FilterHashtable $eventFilter -ErrorAction Stop
             }
             catch [Exception] {
                 if ($_.Exception -match "No events were found that match the specified selection criteria") {
                     Write-Verbose "No matching events found";
-                } else {
+                }
+                else {
                     Write-Error "Error Reading Event Log on Local Computer : $($_.Exception.Message)"
                 }
                 
             }
         }
-    }
     
+    
+        if ($Raw) {
+            Write-Verbose "Returning Raw Events"
+            return $rawEvents
+        }
+        else {
+            
+
+            Write-Verbose "Parsing Events Into Counts"
+            $groupedEvents = $rawevents | Group-Object ID, ProviderName 
+
+            foreach ($group in $groupedEvents) {
+                [PSCustomObject]@{
+                    ComputerName     = $group.group[0].MachineName
+                    LogName          = $group.group[0].LogName
+                    ProviderName     = $group.group[0].ProviderName
+                    Id               = $group.group[0].Id
+                    Message          = $group.group[0].Message
+                    LevelDisplayName = $group.group[0].LevelDisplayName
+                    Count            = $group.Count
+                }
+            }
+        }
+
+    }
+
     end {
         
     }
