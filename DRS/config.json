@@ -37,6 +37,12 @@
         }]
     },
 
+    "WinEventHealth": {
+        "Application": [{
+            "ignoreEventId": ["1000"]
+        }]      
+    },
+
     "certHealth": {
         "ignoreExpiredOlderThanDays": -1,
         "warningExpirationDays": 30,

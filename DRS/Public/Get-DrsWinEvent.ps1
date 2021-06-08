@@ -19,9 +19,11 @@ function Get-DrsWinEvent {
         
         [Parameter(ValueFromPipeline)]
         [Alias("Computer")]
+        [ValidateNotNullOrEmpty]
         [string[]] $ComputerName,
 
         [Alias("Cred")]
+        [ValidateNotNullOrEmpty]
         [System.Management.Automation.PSCredential] $Credential,
 
         [Alias("StartTime")]
@@ -30,14 +32,12 @@ function Get-DrsWinEvent {
         [Alias("EndTime")]
         [datetime] $Before = (Get-Date).AddDays(1),
         
+        [ValidateSet('Application','System','Security')]
         [String] $LogName = "Application",
 
         # 0 (LogAlways), 1 (Critical), 2 (Error), 3 (Warning), 4 (Info), 5 (Verbose)
         [ValidateRange(0, 5)]
-        [Int32] $Severity = 2,
-
-        [switch] $Raw = $false
-
+        [Int32] $Severity = 2
     )
     
     begin {
@@ -54,10 +54,10 @@ function Get-DrsWinEvent {
     }
     
     process {
-        if ($null -ne $ComputerName) {
+        if ($ComputerName) {
             $rawEvents = foreach ($name in $ComputerName) {
                 try {
-                    if ($null -ne $Credential) {
+                    if ($Credential) {
                         Write-Verbose "Getting $LogName Events from $name using Credentials"
                         Get-WinEvent -FilterHashtable $eventFilter -ComputerName $name -Credential $Credential -ErrorAction Stop 
                     }
@@ -91,31 +91,23 @@ function Get-DrsWinEvent {
                 }
                 
             }
-        }
-    
-    
-        if ($Raw) {
-            Write-Verbose "Returning Raw Events"
-            return $rawEvents
-        }
-        else {
-            
+        }            
 
-            Write-Verbose "Parsing Events Into Counts"
-            $groupedEvents = $rawevents | Group-Object ID, ProviderName 
+        Write-Verbose "Parsing Events Into Counts"
+        $groupedEvents = $rawevents | Group-Object ID, ProviderName 
 
-            foreach ($group in $groupedEvents) {
-                [PSCustomObject]@{
-                    ComputerName     = $group.group[0].MachineName
-                    LogName          = $group.group[0].LogName
-                    ProviderName     = $group.group[0].ProviderName
-                    Id               = $group.group[0].Id
-                    Message          = $group.group[0].Message
-                    LevelDisplayName = $group.group[0].LevelDisplayName
-                    Count            = $group.Count
-                }
+        foreach ($group in $groupedEvents) {
+            [PSCustomObject]@{
+                ComputerName     = $group.group[0].MachineName
+                LogName          = $group.group[0].LogName
+                ProviderName     = $group.group[0].ProviderName
+                Id               = $group.group[0].Id
+                Message          = $group.group[0].Message
+                LevelDisplayName = $group.group[0].LevelDisplayName
+                Count            = $group.Count
             }
         }
+    
 
     }
 
